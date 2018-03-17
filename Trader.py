@@ -1,3 +1,4 @@
+# coding: utf-8
 # # Import
 
 # In[1]:
@@ -71,8 +72,8 @@ def get_symbol(ETH,_property,days=365):
     url = 'http://coincap.io/history/'+str(days)+'day/'+ETH
 
     req = urllib.request.Request(
-        url, 
-        data=None, 
+        url,
+        data=None,
         headers={
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
         }
@@ -113,8 +114,8 @@ def get_trades(ETH,EUR):
     url = 'https://api.gdax.com/products/'+str(ETH)+'-'+str(EUR)+'/trades'
 
     req = urllib.request.Request(
-        url, 
-        data=None, 
+        url,
+        data=None,
         headers={
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36'
         }
@@ -153,9 +154,9 @@ def get_symbol_gdx(ETH,minutes=5,fiat='EUR',points=20,endtime='now'):
         #print(len(_candel_stikcs),len(obj))
         #time, low, high, open, close, volume
         _candel_stikcs["Date"] = pd.to_datetime(_candel_stikcs["OpeningTime"],unit='s')
-        
+
         _filtered = _candel_stikcs[(_candel_stikcs['Date'] > _start )] #& (df['date'] < '2013-02-01')]
-       
+
         return _filtered
     else:
         print(minutes,' is not valid')
@@ -216,16 +217,16 @@ def correlation(term,symbol):
 
 
 def risk_matrix(newdfdiff,abshorObs='Volume',absvertObs='MidMarket'):
-    
+
     _range=np.array([-1,-0.3,-0.1,0.1,0.3,1,2,3,5])
     horObs='pct'+abshorObs
     vertObs='pct'+absvertObs
-    
+
     newdfdiff[vertObs]=newdfdiff[absvertObs].pct_change(periods=1)
     newdfdiff[horObs]=newdfdiff[abshorObs].pct_change(periods=1)
 
     print("rho=",newdfdiff[horObs].corr(newdfdiff[vertObs]) )
-    
+
     _C=newdfdiff.groupby(pd.cut(newdfdiff[horObs], _range)).count()
     _M=newdfdiff.groupby(pd.cut(newdfdiff[horObs], _range)).mean()
     _S=newdfdiff.groupby(pd.cut(newdfdiff[horObs], _range)).std()
@@ -238,14 +239,14 @@ def risk_matrix(newdfdiff,abshorObs='Volume',absvertObs='MidMarket'):
     _C['max']=__max[vertObs]
     #risk_matrix(candel_stikcs)
     return _C[['pctVolume','MidMarket','counts','mean','std','min','max']]
-    
+
 
 
 # In[14]:
 
 
 def candel_frequency(cs):
-    candel_stikcs=cs.copy()        
+    candel_stikcs=cs.copy()
     if isinstance(cs, pd.DataFrame):
         candel_stikcs['delta'] = (candel_stikcs['Date'].shift()-candel_stikcs['Date']).fillna(0)
     if isinstance(cs, pd.Series):
@@ -260,21 +261,21 @@ def candel_frequency(cs):
 
 
 def fit_periods(_candel_stikcs,High='High',Low='Low',units='EUR'):
-    
+
     _candel_stikcs['Spread']=abs(_candel_stikcs[High]-_candel_stikcs[Low])
     _candel_stikcs['MidMarket']=(_candel_stikcs[High]+_candel_stikcs[Low]).divide(2.0)
     #candel_stikcs=_candel_stikcs[_candel_stikcs['Spread']!=0].copy()
     candel_stikcs=_candel_stikcs.copy()
     _weights=candel_stikcs['Spread']#.apply(sqrt)
     if ((candel_stikcs[High]==candel_stikcs[Low]).min() == (candel_stikcs[High]==candel_stikcs[Low]).max()):
-        _weights=None 
+        _weights=None
         #print('dropping weights vector in the fit, going with None')
     #
     candel_stikcs['TimeFromT0']=(candel_stikcs['OpeningTime']-candel_stikcs['OpeningTime'][len(candel_stikcs)-1]).divide(60)
     _x=candel_stikcs['TimeFromT0']
     #
     _y=candel_stikcs['MidMarket']#(candel_stikcs[High]+candel_stikcs[Low]).divide(2.0)
-    
+
     def _func(x, a, b):
         return a + b * x
 
@@ -315,11 +316,11 @@ def make_candle_plot(df,title='Candles',plot_width=1000,normalized=False,one=-1,
     dec = df[Open] > df[Close]
     #w = 12*60*60*1000 # half day in ms
     w = 500*500*candel_frequency(df)/300
-    #print('frequency:',candel_frequency(df)/60,' mins') 
+    #print('frequency:',candel_frequency(df)/60,' mins')
     TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
-    start_time=make_time_of_plot(df['Date'].loc[0]) 
+    start_time=make_time_of_plot(df['Date'].loc[0])
     cumtitle=title+" "+start_time
-    
+
     if not normalized:
         _F360, constant, der =fit_periods(df,High=High,Low=Low,units='EUR')
         points=len(df.Date)
@@ -329,7 +330,7 @@ def make_candle_plot(df,title='Candles',plot_width=1000,normalized=False,one=-1,
         #print('{:+.1uS}'.format(_const) ,units+'+', '({:+.1uS}'.format(60*_linear),")"+units+"* t/h" )
         #cumtitle=cumtitle+" ({:.2g}".format(der*100)+")%/h"
         cumtitle=cumtitle+" [ {:+.1uS}".format(der*100)+" ]%/h"
-    
+
     p = figure(x_axis_type="datetime", tools=TOOLS, plot_height=plot_width,plot_width=plot_width, title = cumtitle,x_axis_label='Time',y_axis_label='Price')
     p.xaxis.major_label_orientation = pi/4
     p.xaxis.axis_label_text_font_size = "8pt"
@@ -340,7 +341,7 @@ def make_candle_plot(df,title='Candles',plot_width=1000,normalized=False,one=-1,
     p.segment(df.Date, df[High], df.Date, df[Low], color="black")
     p.vbar(df.Date[inc], w, df[Open].loc[inc], df[Close].loc[inc], fill_color="#D5E1DD", line_color="black")
     p.vbar(df.Date[dec], w, df[Open].loc[dec], df[Close].loc[dec], fill_color="#F2583E", line_color="black")
-    
+
     if not normalized:
         p.line(df.Date.iloc[::-1],_F360(X), line_width=2)
 
@@ -362,7 +363,7 @@ def scrips_from_components(result):
         for plotdata in res:
             _scripts=_scripts+plotdata[2]
     return _scripts
-        
+
 def body_from_components(result):
     _body=''
     i=0
@@ -371,12 +372,12 @@ def body_from_components(result):
         #print(i)
         for plotdata in plot:
             _bodycol=_bodycol+html5_row(plotdata[1])
-        _body=_body+html5_column(_bodycol)   
-    return _body    
+        _body=_body+html5_column(_bodycol)
+    return _body
 
 
 def HTMLfromScriptsBody(_scripts,_body,headline):
-    
+
     _head = '<meta charset="utf-8">    <link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.12.13.min.css" type="text/css">    <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-0.12.13.min.js"></script>    <script type="text/javascript">      Bokeh.set_log_level("info");    </script>    <meta name="viewport" content="width=device-width, initial-scale=1">    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>    <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>    <link href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css"    rel="stylesheet" type="text/css">    <link href="http://pingendo.github.io/pingendo-bootstrap/themes/default/bootstrap.css"    rel="stylesheet" type="text/css">'
 
     titlerow='<div class="row">          <div class="col-md-12">            <h1 class="text-center">'+headline+'</h1>          </div>        </div>'
@@ -399,20 +400,20 @@ def make_html5_plots(width=400,High='Open',Low='Close',currency='ETH',fiat='EUR'
         _column_tbtransposed=make_column_plot(candel_stikcs,mins,points,width)
         #print(len(_column_tbtransposed))
         result.append(_column_tbtransposed)
-    #    
+    #
     _scripts=scrips_from_components(result)
     _body=body_from_components(result)
 
-            
+
     _HTML = HTMLfromScriptsBody(_scripts,_body,output_name)
 
-    
+
     text_file = open(output_name+".html", "w")
     text_file.write(_HTML)
     text_file.close()
-    
+
     publish_ftp_file(output_name+".html")
-    
+
     output_file(output_name+".htm", title="GDAX monitor")
     save(row(column(result[0][0][0],result[0][1][0],result[0][2][0]),column(result[1][0][0],result[1][1][0],result[1][2][0]),column(result[2][0][0],result[2][1][0],result[2][2][0])))
     publish_ftp_file(output_name+".htm")
@@ -430,7 +431,7 @@ def make_time_of_plot(ss):
 
 def make_candle_plot_volume(df,title='Volume',plot_width=1000,normalized=False,one=-1,High='High',Low='Low',aspect=3,html5_components=False):
     #print(df)
-    
+
     Volume='Volume'
     if normalized:
         norm=df['Volume'].iloc[one]
@@ -439,9 +440,9 @@ def make_candle_plot_volume(df,title='Volume',plot_width=1000,normalized=False,o
         Volume='nVolume'
 
     w = 500*500*candel_frequency(df)/300
-    #print('frequency:',candel_frequency(df)/60,' mins') 
+    #print('frequency:',candel_frequency(df)/60,' mins')
     TOOLS = "pan,wheel_zoom,box_zoom,reset,save"
-    start_time=make_time_of_plot(df['Date'].loc[0]) 
+    start_time=make_time_of_plot(df['Date'].loc[0])
     cumtitle=title+" "+start_time
 
     _LinearFitFunction, ConstCoeff, LinearCoeff =fit_periods(df,High=Volume,Low=Volume,units='Vol')
@@ -458,7 +459,7 @@ def make_candle_plot_volume(df,title='Volume',plot_width=1000,normalized=False,o
     p.grid.grid_line_alpha=0.3
     p.line(df.Date.iloc[::-1],_LinearFitFunction(X), line_width=2)
     p.circle(df.Date.iloc[::-1],df[Volume].iloc[::-1], size=8)#fill_color="blue"
-    
+
     if not html5_components:
         return p
     if html5_components:
@@ -491,4 +492,3 @@ def html5_column(_div):
 
 def html5_row(_div):
     return '<div class="row">'+_div+'</div>'
-
