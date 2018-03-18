@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.6
 # coding: utf-8 
 # # Import
 
-# In[86]:
+# In[1]:
 
 
 import csv,importlib
@@ -131,7 +131,7 @@ def get_trades(ETH,EUR):
     return obj
 
 
-# In[7]:
+# In[24]:
 
 
 def get_symbol_gdx(ETH,minutes=5,fiat='EUR',points=20,endtime='now'):
@@ -162,6 +162,12 @@ def get_symbol_gdx(ETH,minutes=5,fiat='EUR',points=20,endtime='now'):
     else:
         print(minutes,' is not valid')
 #/api/v1/klines
+
+
+# In[25]:
+
+
+get_symbol_gdx('BTC')
 
 
 # In[8]:
