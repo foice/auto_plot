@@ -2,14 +2,14 @@
 # coding: utf-8 
 # # Import
 
-# In[1]:
+# In[86]:
 
 
 import csv,importlib
 import pandas as pd
 import numpy as np
 import matplotlib as mpl
-#%matplotlib inline
+#%matplotlib inline #not used in scripts
 import matplotlib.pyplot as plt
 import matplotlib.pylab as plb
 import urllib.request
